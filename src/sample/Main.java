@@ -12,10 +12,17 @@ import  javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 public class Main extends Application {
 
     Stage window;
+    Button encryptButton, decryptButton;
+    Label passLabel, plaintextLable, Encrypted_Lable;
+    TextField inputPass;
+    TextArea inputPlaintext,Encrypted_Text;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -28,39 +35,54 @@ public class Main extends Application {
             grid.setHgap(10);
 
             // password label and Text field.
-            Label passLabel = new Label("Password");
+            passLabel = new Label("Password");
             GridPane.setConstraints(passLabel, 0, 0);
 
-            TextField inputPass = new TextField();
+            inputPass = new TextField();
             inputPass.setPromptText("Example: xyzt1993");
             GridPane.setConstraints(inputPass, 1,0);
 
 
         // encryption label and text field;
-            Label plaintextLable = new Label("Text");
+            plaintextLable = new Label("Text");
             GridPane.setConstraints(plaintextLable, 0, 1);
 
-            TextArea inputPlaintext = new TextArea();
+            inputPlaintext = new TextArea();
             inputPlaintext.setPromptText("Example: Today is a sunny day");
             GridPane.setConstraints(inputPlaintext, 1, 1);
 
 
+
             //Creating the encrypt  button
-             Button encryptButton = new Button("Encrypt");
-             GridPane.setConstraints(encryptButton, 0, 2);
+            encryptButton = new Button("Encrypt");
+            GridPane.setConstraints(encryptButton, 0, 2);
 
 
             // encryption label and text field;
-            Label Encrypted_Lable = new Label("Text");
+            Encrypted_Lable = new Label("Encrypted Text");
             GridPane.setConstraints(Encrypted_Lable, 0, 3);
 
-            TextArea Encrypted_Text = new TextArea();
+            Encrypted_Text = new TextArea();
             Encrypted_Text.setPromptText("Example: Today is a sunny day");
             GridPane.setConstraints(Encrypted_Text, 1, 3);
 
+            // Handling the press of Encryption Button. encryptionEvent() can be found outside of start
+            encryptButton.setOnAction(e-> {
+                boolean validPass = isKeyValid(inputPass.getText()); //checks the input Key is valid
 
+                if (validPass == true){
+                    encryptionEvent();
+                }
+
+            });
+
+
+
+
+
+            // Including elements to the Scene and showing the window.
             grid.getChildren().addAll(plaintextLable, inputPlaintext, passLabel, inputPass, encryptButton, Encrypted_Text, Encrypted_Lable);
-            Scene scene = new Scene(grid, 600, 600);
+            Scene scene = new Scene(grid, 600, 500);
             window.setScene(scene);
             window.show();
 
@@ -68,8 +90,64 @@ public class Main extends Application {
 
     }
 
+    private void encryptionEvent() { // This function only works if the
+        String text = inputPlaintext.getText();
+        String pass = inputPass.getText();
+        String newPass = validatingPassword(pass);
 
-    public static void main(String[] args) {
-        launch(args);
+        try{
+            AES_encryption aes = new AES_encryption(newPass);
+            String encdata = aes.AESEncrypt(text);
+            Encrypted_Text.setText(encdata);
+
+            System.out.println("Encrypted data: "+ encdata);
+
+            // String decdata = aes.AESDecrypt(encdata);
+            //System.out.println("Decrypted data: " + decdata);
+
+        } catch (Exception ex) {
+            Logger.getLogger(AES_encryption.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+
     }
+
+    private String validatingPassword(String pass){
+
+        while(pass.length() != 16){
+            if (pass.length() >= 6 && pass.length() < 16){
+                // padding is needed
+                pass = pass + "#";
+            }else if( pass.length() == 16) {
+                //this is when key is exactly 16 characters long
+                return  pass;
+            }else {
+                InvalidKeyAlert.display("Unexpected error: Please try a different Key.");
+            }
+        }
+
+        return pass;
+    }
+
+    //returns true if the encryption Key is between 6 and 16 characters long
+    private static boolean isKeyValid(String pass){
+        String message;
+        if( pass.length()< 6 ){
+            message = "Key must be greater than 6 characters";
+            InvalidKeyAlert.display(message);
+            return false;
+        }else if (pass.length() >= 6 && pass.length() <=16){
+            return true;
+        }else if (pass.length() > 16){
+            message = "Key must be less than 16 characters long";
+            InvalidKeyAlert.display(message);
+            return false;
+        }else {
+            return false;
+        }
+    }
+
+
+    public static void main(String[] args) { launch(args); }
+
 }
