@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
@@ -21,6 +22,7 @@ public class InvalidKeyAlert {
         window.initModality(Modality.APPLICATION_MODAL); // This prevents the user form using other windows of the app.
         window.setMinWidth(250);
 
+
         Label label = new Label(message);
         Button okButton = new Button("OK");
         okButton.setOnAction(e -> window.close());
@@ -28,7 +30,8 @@ public class InvalidKeyAlert {
 
         //Setting up layout
 
-        VBox layout = new VBox(10); // 10 pixel spacing.
+        VBox layout = new VBox(20); // 10 pixel spacing.
+        layout.setPadding(new Insets(10,  10, 10, 10));
         layout.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(label, okButton);
         Scene scene = new Scene(layout);

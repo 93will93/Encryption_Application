@@ -47,4 +47,39 @@ public class AES_encryption {
     }
 
 
+    public static String correctingKey(String key){
+
+        while(key.length() != 16){
+            if (key.length() >= 6 && key.length() < 16){
+                // padding is needed
+                key = key + "#";
+            }else if( key.length() == 16) {
+                //this is when key is exactly 16 characters long
+                return  key;
+            }else {
+                InvalidKeyAlert.display("Unexpected error: Please try a different Key.");
+            }
+        }
+
+        return key;
+    }
+
+    public static boolean isKeyValid(String key){
+        String message;
+        if( key.length()< 6 ){
+            message = "Key must be greater than 6 characters";
+            InvalidKeyAlert.display(message);
+            return false;
+        }else if (key.length() >= 6 && key.length() <=16){
+            return true;
+        }else if (key.length() > 16){
+            message = "Key must be less than 16 characters long";
+            InvalidKeyAlert.display(message);
+            return false;
+        }else {
+            return false;
+        }
+    }
+
+
 }

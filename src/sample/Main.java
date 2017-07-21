@@ -5,24 +5,29 @@ import javafx.geometry.Insets;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import  javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import  javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*
+    This application was created by William Becerra Gonzalez.
 
+    The current AES  encryption algorithm used is a mikey mouse one from the internet.
+    However implementing your own should be an easy task and if added using the same naming convention
+    as the AES_encryption class the applications functionality will work undisturbed.
+*/
 public class Main extends Application {
 
-    Stage window;
-    Button encryptButton, decryptButton;
-    Label passLabel, plaintextLable, Encrypted_Lable;
-    TextField inputPass;
-    TextArea inputPlaintext,Encrypted_Text;
+    private Stage window;
+    private Button proceed_Button;
+    private Label KeyLabel, inputText_Label, output_Label;
+    private TextField inputKey;
+    private TextArea input_Text,output_Text;
+    private ComboBox<String> optionBox;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -35,53 +40,77 @@ public class Main extends Application {
             grid.setHgap(10);
 
             // password label and Text field.
-            passLabel = new Label("Password");
-            GridPane.setConstraints(passLabel, 0, 0);
+            KeyLabel = new Label("Encryption Key");
+            GridPane.setConstraints(KeyLabel, 0, 0);
 
-            inputPass = new TextField();
-            inputPass.setPromptText("Example: xyzt1993");
-            GridPane.setConstraints(inputPass, 1,0);
-
-
-        // encryption label and text field;
-            plaintextLable = new Label("Text");
-            GridPane.setConstraints(plaintextLable, 0, 1);
-
-            inputPlaintext = new TextArea();
-            inputPlaintext.setPromptText("Example: Today is a sunny day");
-            GridPane.setConstraints(inputPlaintext, 1, 1);
+            inputKey = new TextField();
+            inputKey.setPromptText("Example: xyzt1993");
+            GridPane.setConstraints(inputKey, 1,0);
 
 
+             // encryption label and text field;
+            inputText_Label= new Label("Plain Text");
+            GridPane.setConstraints(inputText_Label, 0, 1);
 
-            //Creating the encrypt  button
-            encryptButton = new Button("Encrypt");
-            GridPane.setConstraints(encryptButton, 0, 2);
+            input_Text = new TextArea();
+            input_Text.setPromptText("Example: Today is a sunny day");
+            GridPane.setConstraints(input_Text, 1, 1);
+
+
+
+             //Creating the encrypt  button
+            proceed_Button = new Button("Proceed");
+            proceed_Button.setPrefWidth(100);
+
+            //creating a comboBox
+            optionBox = new ComboBox<>();
+            optionBox.getItems().addAll("Encrypt", "Decrypt");
+            optionBox.setPromptText("Choice?");
+            optionBox.setPrefWidth(120);
+            optionBox.setOnAction(e->{
+                String choice = optionBox.getValue();
+                if (choice.equals("Encrypt")){
+                    inputText_Label.setText("Plain Text");
+                    output_Label.setText("Encrypted Text");
+
+                }else if (choice.equals("Decrypt")) {
+                    inputText_Label.setText("Encrypted Text");
+                    output_Label.setText("Decrypted Text");
+                }
+            });
+
+
+
+
+            //Wrapping the button and Drop Down list into one HBox
+            HBox buttonAndList = new HBox();
+            buttonAndList.getChildren().addAll(optionBox, proceed_Button);
+            //buttonAndList.getChildren().addAll(encDecChoice, proceed_Button);
+            buttonAndList.setSpacing(5);
+            GridPane.setConstraints(buttonAndList, 0, 2);
 
 
             // encryption label and text field;
-            Encrypted_Lable = new Label("Encrypted Text");
-            GridPane.setConstraints(Encrypted_Lable, 0, 3);
+            output_Label = new Label("Encrypted Text");
+            GridPane.setConstraints(output_Label, 0, 3);
 
-            Encrypted_Text = new TextArea();
-            Encrypted_Text.setPromptText("Example: Today is a sunny day");
-            GridPane.setConstraints(Encrypted_Text, 1, 3);
+            output_Text = new TextArea();
+            output_Text.setPromptText("Example: Today is a sunny day");
+            GridPane.setConstraints(output_Text, 1, 3);
+
+
 
             // Handling the press of Encryption Button. encryptionEvent() can be found outside of start
-            encryptButton.setOnAction(e-> {
-                boolean validPass = isKeyValid(inputPass.getText()); //checks the input Key is valid
+            proceed_Button.setOnAction(e-> buttonPressEvent());
 
-                if (validPass == true){
-                    encryptionEvent();
-                }
 
-            });
 
 
 
 
 
             // Including elements to the Scene and showing the window.
-            grid.getChildren().addAll(plaintextLable, inputPlaintext, passLabel, inputPass, encryptButton, Encrypted_Text, Encrypted_Lable);
+            grid.getChildren().addAll(buttonAndList, inputText_Label, input_Text, KeyLabel, inputKey, output_Text, output_Label);
             Scene scene = new Scene(grid, 600, 500);
             window.setScene(scene);
             window.show();
@@ -91,16 +120,14 @@ public class Main extends Application {
     }
 
     private void encryptionEvent() { // This function only works if the
-        String text = inputPlaintext.getText();
-        String pass = inputPass.getText();
-        String newPass = validatingPassword(pass);
+        String text = input_Text.getText();
+        String key = inputKey.getText();
+        String newKey = AES_encryption.correctingKey(key);
 
         try{
-            AES_encryption aes = new AES_encryption(newPass);
-            String encdata = aes.AESEncrypt(text);
-            Encrypted_Text.setText(encdata);
-
-            System.out.println("Encrypted data: "+ encdata);
+            AES_encryption Aes = new AES_encryption(newKey);
+            String encdata = Aes.AESEncrypt(text);
+            output_Text.setText(encdata);
 
             // String decdata = aes.AESDecrypt(encdata);
             //System.out.println("Decrypted data: " + decdata);
@@ -111,41 +138,45 @@ public class Main extends Application {
         }
 
     }
+    private void decryptionEvent(){
+        String text = input_Text.getText();
+        String key = inputKey.getText();
+        String newKey = AES_encryption.correctingKey(key);
 
-    private String validatingPassword(String pass){
+        try{
+            AES_encryption Aes = new AES_encryption(newKey);
 
-        while(pass.length() != 16){
-            if (pass.length() >= 6 && pass.length() < 16){
-                // padding is needed
-                pass = pass + "#";
-            }else if( pass.length() == 16) {
-                //this is when key is exactly 16 characters long
-                return  pass;
-            }else {
-                InvalidKeyAlert.display("Unexpected error: Please try a different Key.");
+            String decdata = Aes.AESDecrypt(text);
+            output_Text.setText(decdata);
+
+        } catch (Exception ex) {
+            Logger.getLogger(AES_encryption.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+
+    }
+
+    private void buttonPressEvent(){
+        boolean validKey = AES_encryption.isKeyValid(inputKey.getText()); //checks the input Key is valid
+
+        String choice = optionBox.getValue();        // encrypt of decrypt choice
+        try {
+            if (validKey == true) {
+                if (choice.equals("Encrypt")) {
+                    encryptionEvent();
+                } else if (choice.equals("Decrypt")) {
+                    decryptionEvent();
+                }
+
             }
+        }catch(NullPointerException v){
+            String message = "Error: Select one of the Encrypt/Decrypt choices.";
+            message = message + v;
+            InvalidKeyAlert.display(message);
         }
 
-        return pass;
     }
 
-    //returns true if the encryption Key is between 6 and 16 characters long
-    private static boolean isKeyValid(String pass){
-        String message;
-        if( pass.length()< 6 ){
-            message = "Key must be greater than 6 characters";
-            InvalidKeyAlert.display(message);
-            return false;
-        }else if (pass.length() >= 6 && pass.length() <=16){
-            return true;
-        }else if (pass.length() > 16){
-            message = "Key must be less than 16 characters long";
-            InvalidKeyAlert.display(message);
-            return false;
-        }else {
-            return false;
-        }
-    }
 
 
     public static void main(String[] args) { launch(args); }
