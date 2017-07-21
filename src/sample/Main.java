@@ -171,7 +171,7 @@ public class Main extends Application {
             }
         }catch(NullPointerException v){
             String message = "Error: Select one of the Encrypt/Decrypt choices.";
-            message = message + v;
+            //message = message + v;
             InvalidKeyAlert.display(message);
         }
 
