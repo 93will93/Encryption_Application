@@ -15,10 +15,8 @@ import java.util.logging.Logger;
 
 /*
     This application was created by William Becerra Gonzalez.
+    Feel free to use it for non commercial use.
 
-    The current AES  encryption algorithm used is a mikey mouse one from the internet.
-    However implementing your own should be an easy task and if added using the same naming convention
-    as the AES_encryption class the applications functionality will work undisturbed.
 */
 public class Main extends Application {
 
